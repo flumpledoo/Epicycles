@@ -17,23 +17,23 @@ Usage:
 
 Arguments:
     > in: input svg file
-    > out: name of output file (optional)
     > N: int number of points to sample along Bezier curves (default 100)
+    > out: name of output file (optional)
 '''
 
 # get input file name
 filename = sys.argv[1]
 
 # get output file name
-if len(sys.argv) > 2:
-    out = sys.argv[2]
+if len(sys.argv) > 3:
+    out = sys.argv[3]
 else:
     out='.'.join([filename[:-4], 'mp4'])
 
 
 # no. points to sample along each bezier curve
-if len(sys.argv) > 3:
-    N = sys.argv[3]
+if len(sys.argv) > 2:
+    N = int(sys.argv[2])
 else:
     N = 100
 
@@ -186,6 +186,6 @@ def init_func():
 ani = animation.FuncAnimation(
     fig, drawnext, init_func=init_func, interval=100/2.4, frames=range(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N)), repeat=False)
 
-plt.show()
+# plt.show()
 
 ani.save(out)
