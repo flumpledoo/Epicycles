@@ -64,11 +64,6 @@ for child in root.findall(".//{http://www.w3.org/2000/svg}g"): # find g tags
 
 # %%
 
-for c in cur:
-    plt.plot(np.real(c), np.imag(c))
-
-# %%
-
 # get params for DFT and epicycle drawing
 def compute_epi(Z, N):
     DFT = np.fft.fft(Z, n=N)/N # DFT of data
