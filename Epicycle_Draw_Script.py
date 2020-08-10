@@ -25,14 +25,14 @@ Arguments:
 filename = sys.argv[1]
 
 # get output file name
-if len(sys.argv) > 1:
+if len(sys.argv) > 2:
     out = sys.argv[2]
 else:
-    out='.'.join(filename[:-4], 'mp4')
+    out='.'.join([filename[:-4], 'mp4'])
 
 
 # no. points to sample along each bezier curve
-if len(sys.argv) > 2:
+if len(sys.argv) > 3:
     N = sys.argv[3]
 else:
     N = 100
