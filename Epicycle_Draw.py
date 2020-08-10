@@ -24,18 +24,20 @@ tree = ET.parse('drawing-1.svg')
 root = tree.getroot()
 
 # get dimensions for centering
-h = float(re.sub('[^0-9]', '', root.attrib["height"])) # remove unit and convert to float
+# remove unit and convert to float
+h = float(re.sub('[^0-9]', '', root.attrib["height"]))
 w = float(re.sub('[^0-9]', '', root.attrib["width"]))
 
 # extract paths
-for child in root.findall(".//{http://www.w3.org/2000/svg}g"): # find g tags
-    for p in child.findall(".//{http://www.w3.org/2000/svg}path"): # get paths
-        tp = parse_path(p.attrib["d"]) # parse paths
-        dc = list() # instantiate list of discrete points for sampling
+for child in root.findall(".//{http://www.w3.org/2000/svg}g"):  # find g tags
+    for p in child.findall(".//{http://www.w3.org/2000/svg}path"):  # get paths
+        tp = parse_path(p.attrib["d"])  # parse paths
+        dc = list()  # instantiate list of discrete points for sampling
 
         # discretise path
-        for i in range(0, N+1):
-            dc.append(tp.point(i/N) - w/2 - (h/2)*1j) # discretise and recenter
+        for i in range(0, N + 1):
+            dc.append(tp.point(i / N) - w / 2 - (h / 2)
+                      * 1j)  # discretise and recenter
 
         # convert discrete curve to np array and append to cur
         cur.append(np.array(dc).conj())
@@ -48,20 +50,22 @@ for c in cur:
 # %%
 
 # get params for DFT and epicycle drawing
+
+
 def compute_epi(Z, N):
-    DFT = np.fft.fft(Z, n=N)/N # DFT of data
-    k = np.arange(0, N) # circle frequencies
-    r = np.abs(DFT) # circle radii
-    phase = np.angle(DFT) # initial circle phases
+    DFT = np.fft.fft(Z, n=N) / N  # DFT of data
+    k = np.arange(0, N)  # circle frequencies
+    r = np.abs(DFT)  # circle radii
+    phase = np.angle(DFT)  # initial circle phases
 
     # sort by descending radius
-    idx = r.argsort(kind='stable') # indices if r sorted ascending
-    r = r[idx][::-1] # sort r and reverse
-    k = k[idx][::-1] # sort k and reverse
-    phase = phase[idx][::-1] #sort and reverse
-    DFT = DFT[idx][::-1] # sort and reverse
+    idx = r.argsort(kind='stable')  # indices if r sorted ascending
+    r = r[idx][::-1]  # sort r and reverse
+    k = k[idx][::-1]  # sort k and reverse
+    phase = phase[idx][::-1]  # sort and reverse
+    DFT = DFT[idx][::-1]  # sort and reverse
 
-    return { 'DFT': DFT, 'radii': r, 'frequency': k, 'phase': phase }
+    return {'DFT': DFT, 'radii': r, 'frequency': k, 'phase': phase}
 
 
 # draw epicycles and line
@@ -80,8 +84,8 @@ def draw_epi(k, A, time, phase, wavex, wavey):
         py = y
 
         # get new joint point coords
-        x += A[i] * np.cos(k[i]*time + phase[i])
-        y += A[i] * np.sin(k[i]*time + phase[i])
+        x += A[i] * np.cos(k[i] * time + phase[i])
+        y += A[i] * np.sin(k[i] * time + phase[i])
 
         # circle centres
         centres[i, 0] = px
@@ -100,7 +104,8 @@ def draw_epi(k, A, time, phase, wavex, wavey):
 
     # plot
     for i in range(N):
-        ax.add_artist(Circle((centres[i, 0], centres[i, 1]), radius=A[i], color='k', fill=False))
+        ax.add_artist(
+            Circle((centres[i, 0], centres[i, 1]), radius=A[i], color='k', fill=False))
 
         # joining lines
         plt.plot(lines[i, 0:2], lines[i, 2:4], color='k')
@@ -120,7 +125,7 @@ def draw_epi(k, A, time, phase, wavex, wavey):
 # matplotlib animation lib method
 comp = compute_epi(cur[0], N)
 
-ts = 2*np.pi/comp['DFT'].shape[0]
+ts = 2 * np.pi / comp['DFT'].shape[0]
 
 # draw result
 time = 0
@@ -131,25 +136,24 @@ wavey = list()
 fig = plt.figure()
 ax = plt.axes()
 
-xp = list() # previous x
+xp = list()  # previous x
 yp = list()
+
 
 def drawnext(i):
 
-
-
     global wavex, wavey, comp, xp, yp
 
-    if i%N==0:
-        comp = compute_epi(cur[int(np.floor(i/(N)))], N)
+    if i % N == 0:
+        comp = compute_epi(cur[int(np.floor(i / (N)))], N)
         # print(f'{i*100/(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N))}% Complete!')
         xp.append(wavex.copy())
         yp.append(wavey.copy())
         wavex = list()
-        wavey=list()
+        wavey = list()
 
-
-    a = draw_epi(comp['frequency'], comp['radii'], i*2*np.pi/N, comp['phase'], wavex, wavey)
+    a = draw_epi(comp['frequency'], comp['radii'], i * 2 *
+                 np.pi / N, comp['phase'], wavex, wavey)
 
     for i, prev in enumerate(xp):
         plt.plot(prev, yp[i], '-b')
@@ -157,9 +161,10 @@ def drawnext(i):
     wavex = a[0]
     wavey = a[1]
 
+
 def init_func():
     global h, w
-    ax.axis([-w/2, w/2, -h/2, h/2])
+    ax.axis([-w / 2, w / 2, -h / 2, h / 2])
     plt.axis('scaled')
     plt.xlabel('Dalgarnitude')
     plt.ylabel('Paulness')
@@ -167,7 +172,7 @@ def init_func():
 
 
 ani = animation.FuncAnimation(
-    fig, drawnext, init_func=init_func, interval=100/2.4, frames=trange(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N)), repeat=False)
+    fig, drawnext, init_func=init_func, interval=100 / 2.4, frames=trange(len(child.findall(".//{http://www.w3.org/2000/svg}path")) * (N)), repeat=False)
 
 plt.show()
 
