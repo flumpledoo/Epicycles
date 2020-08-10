@@ -13,7 +13,7 @@ import sys
 Draws Fourier Epicycle animation for input svg line art.
 
 Usage:
-    $ Epicycle_Draw_Script in N, out
+    $ Epicycle_Draw_Script in N out
 
 Arguments:
     > in: input svg file
