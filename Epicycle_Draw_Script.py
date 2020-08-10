@@ -6,6 +6,8 @@ import matplotlib.animation as animation
 import xml.etree.ElementTree as ET
 import re
 import sys
+import time
+from tqdm import tqdm
 
 # %%
 
@@ -154,12 +156,11 @@ yp = list()
 def drawnext(i):
 
 
-
     global wavex, wavey, comp, xp, yp
 
     if i%N==0:
         comp = compute_epi(cur[int(np.floor(i/(N)))], N)
-        print(f'{i*100/(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N))}% Complete!')
+        # print(f'{i*100/(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N))}% Complete!')
         xp.append(wavex.copy())
         yp.append(wavey.copy())
         wavex = list()
@@ -184,7 +185,7 @@ def init_func():
 
 
 ani = animation.FuncAnimation(
-    fig, drawnext, init_func=init_func, interval=100/2.4, frames=range(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N)), repeat=False)
+    fig, drawnext, init_func=init_func, interval=100/2.4, frames=tqdm(range(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N))), repeat=False)
 
 # plt.show()
 
