@@ -1,16 +1,3 @@
-import numpy as np
-from svg.path import *
-from matplotlib import pyplot as plt
-from matplotlib.patches import Circle
-import matplotlib.animation as animation
-import xml.etree.ElementTree as ET
-import re
-import sys
-import time
-from tqdm import tqdm
-
-# %%
-
 '''
 Draws Fourier Epicycle animation for input svg line art.
 
@@ -22,6 +9,16 @@ Arguments:
     > N: int number of points to sample along Bezier curves (default 100)
     > out: name of output file (optional)
 '''
+
+import xml.etree.ElementTree as ET
+import re
+import sys
+import numpy as np
+from svg.path import *
+from matplotlib import pyplot as plt
+from matplotlib.patches import Circle
+import matplotlib.animation as animation
+from tqdm import tqdm
 
 # get input file name
 filename = sys.argv[1]
@@ -115,8 +112,6 @@ def draw_epi(k, A, time, phase, wavex, wavey):
 
     ax.clear()
 
-    circles = list()
-
     # update resultant waveform
     wavex.append(x)
     wavey.append(y)
@@ -124,7 +119,8 @@ def draw_epi(k, A, time, phase, wavex, wavey):
     # plot
     for i in range(N):
         ax.add_artist(
-            Circle((centres[i, 0], centres[i, 1]), radius=A[i], color='k', fill=False))
+            Circle((centres[i, 0], centres[i, 1]),
+                   radius=A[i], color='k', fill=False))
 
         # joining lines
         plt.plot(lines[i, 0:2], lines[i, 2:4], color='k')
@@ -185,13 +181,16 @@ def init_func():
     global h, w
     ax.axis([-w / 2, w / 2, -h / 2, h / 2])
     plt.axis('scaled')
-    plt.xlabel('Dalgarnitude')
-    plt.ylabel('Paulness')
-    plt.title('Fourier Series Drawing of Dr. Paul Andrew Dalgarno')
+#     plt.xlabel('Dalgarnitude')
+#     plt.ylabel('Paulness')
+#     plt.title('Fourier Series Drawing of Dr. Paul Andrew Dalgarno')
 
 
 ani = animation.FuncAnimation(
-    fig, drawnext, init_func=init_func, interval=100 / 2.4, frames=tqdm(range(len(child.findall(".//{http://www.w3.org/2000/svg}path")) * (N))), repeat=False)
+    fig, drawnext, init_func=init_func, interval=100 / 2.4,
+    frames=tqdm(range(len(
+        child.findall(".//{http://www.w3.org/2000/svg}path"))
+        * (N))), repeat=False)
 
 # plt.show()
 
