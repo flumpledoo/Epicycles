@@ -5,11 +5,13 @@ The shapes are provided as svg line-art as illustrated in example *drawing-1.svg
 
 Usage:
 ```bash
-    $ Epicycle_Draw_Script in N out
+$ Epicycle_Draw_Script in N out
 ```
 Arguments:
 ```
-    > in: input svg file
-    > N: int number of points to sample along Bezier curves (default 100)
-    > out: name of output file (optional)
+> in: input svg file
+> N: int number of points to sample along Bezier curves (default 100)
+> out: name of output file (optional)
 ```
+
+Apologies for the sloppiness of my code. I am a dunce and a fool :)
