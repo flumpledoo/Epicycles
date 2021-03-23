@@ -5,7 +5,7 @@ The shapes are provided as svg line-art as illustrated in example *drawing-1.svg
 
 Usage:
 ```bash
-$ Epicycle_Draw_Script in N out
+$ python Epicycle_Draw_Script in N out
 ```
 Arguments:
 ```
