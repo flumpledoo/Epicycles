@@ -1,0 +1,4 @@
+svg.path==6.2
+matplotlib==3.5.2
+tqdm==4.64.1
+numpy==1.23.3

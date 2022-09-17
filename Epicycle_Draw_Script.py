@@ -38,8 +38,7 @@ else:
 if len(sys.argv) > 2:
     N = int(sys.argv[2])
 else:
-    N = 100
-
+    N = 200
 
 # list of bezier curves
 cur = list()
@@ -84,21 +83,6 @@ for i, tp in enumerate(path_list):
         # convert discrete curve to np array and append to cur
         cur.append(np.array(dc).conj()) 
 
-# for child in root.findall(".//{http://www.w3.org/2000/svg}g"):  # find g tags
-#     for p in child.findall(".//{http://www.w3.org/2000/svg}path"):  # get paths
-#         tp = parse_path(p.attrib["d"])  # parse paths
-#         dc = list()  # instantiate list of discrete points for sampling
-
-#         # discretise path
-#         for i in range(0, N + 1):
-#             dc.append(tp.point(i / N) - w / 2 - (h / 2)
-#                       * 1j)  # discretise and recenter
-
-#         # convert discrete curve to np array and append to cur
-#         cur.append(np.array(dc).conj())
-
-# %%
-
 # get params for DFT and epicycle drawing
 
 
@@ -116,9 +100,6 @@ def compute_epi(Z, N):
     DFT = DFT[idx][::-1]  # sort and reverse
 
     return {'DFT': DFT, 'radii': r, 'frequency': k, 'phase': phase}
-
-
-# %%
 
 # matplotlib animation lib method
 cycle_data = list()
@@ -157,71 +138,23 @@ yp = list()
 
 current_frame = 0
 
-# draw epicycles and line
-def draw_epi(k, A, time, phase, wavex, wavey, curve_index):
-
-    # compute coords
-    x = 0
-    y = 0
-    N = k.shape[0]
-    centres = np.zeros((N, 2))
-    lines = np.zeros((N, 4))
-
-    for i in range(0, N):
-        # store previous coords for new circle centre
-        px = x
-        py = y
-
-        # get new joint point coords
-        x += A[i] * np.cos(k[i] * time + phase[i])
-        y += A[i] * np.sin(k[i] * time + phase[i])
-
-        # circle centres
-        centres[i, 0] = px
-        centres[i, 1] = py
-
-        # radii lines
-        lines[i, :] = np.array([px, x, py, y])
-
-    ax.clear()
-
-    # update resultant waveform
-    wavex.append(x)
-    wavey.append(y)
-
-    # plot
-    for i in range(N):
-        ax.add_artist(
-            Circle((centres[i, 0], centres[i, 1]),
-                   radius=A[i], color='k', fill=False))
-
-        # joining lines
-        ax.plot(lines[i, 0:2], lines[i, 2:4], color='k')
-
-        # pointer
-        ax.plot(x, y, 'or')
-
-        # plot resultant waveform
-        # if len(wavex) > 0:
-        #     ax.plot(wavex, wavey, '-b')
-        # linel[curve_index].set_xdata(wavex)
-        # linel[curve_index].set_ydata(wavey)
-
-    return [wavex, wavey]
-
 prev_cur = 0
+
+final_flag = False
 
 def drawnext(i):
 
-    global wavex, wavey, comp, xp, yp, current_frame, prev_cur
+    global wavex, wavey, comp, xp, yp, current_frame, prev_cur, final_flag
 
-    # if i % N == 0:
-    #     comp = compute_epi(cur[int(np.floor(i / (N)))], N)
-    #     # print(f'{i*100/(len(child.findall(".//{http://www.w3.org/2000/svg}path"))*(N))}% Complete!')
-    #     xp.append(wavex.copy())
-    #     yp.append(wavey.copy())
-    #     wavex = list()
-    #     wavey = list()
+    if i == -1:  # insert extra frames of completed lineart
+        ax.clear()
+        if final_flag == False:
+            xp.append(wavex.copy())
+            yp.append(wavey.copy())
+            final_flag = True
+        for j, prev in enumerate(xp):
+            plt.plot(prev, yp[j], '-b')
+        return linel
 
     if prev_cur != i:
         comp = cycle_data[i]  # get current curve's epicycle data
@@ -231,9 +164,6 @@ def drawnext(i):
         wavey = list()
         prev_cur = i
         current_frame = 0
-
-    # a = draw_epi(comp['frequency'], comp['radii'], current_frame * 2 *
-                #  np.pi / N, comp['phase'], wavex, wavey, i)
 
     # compute coords
     k = comp['frequency']
@@ -271,14 +201,7 @@ def drawnext(i):
     wavex.append(x)
     wavey.append(y)
 
-    # circ_artist, jl = list(), list()
     for j in range(N):
-        # ca = ax.add_artist(Circle((centres[j, 0], centres[j, 1]), radius=A[j], color='k', fill=False))
-        # circ_artist.append(ca)
-        # # joining lines
-        # jlj, = ax.plot(lines[j, 0:2], lines[j, 2:4], color='k')
-        # jl.append(jlj)
-
         ax.add_artist(
             Circle(
                 (centres[j, 0], centres[j, 1]), 
@@ -289,25 +212,13 @@ def drawnext(i):
 
         ax.plot(wavex, wavey, '-b')
 
-
-    # pointer
-    # pntr,  = ax.plot(x, y, 'or')
     ax.plot(x, y, 'or')
 
     for j, prev in enumerate(xp):
         plt.plot(prev, yp[j], '-b')
-    # linel[i].set_xdata(xp)
-    # linel[i].set_ydata(yp)
-
-    # wavex = a[0]
-    # wavey = a[1]
 
     current_frame += 1
 
-    # retlist = [linel[i], pntr]
-    # retlist.extend(circ_artist)
-    # retlist.extend(jl)
-    # return retlist
     return linel
 
 
@@ -317,18 +228,10 @@ def init_func():
     ax.set_ylim(-h/2, h/2)
     ax.axis('scaled')
     return linel
-    # ax.axis([-w / 2, w / 2, -h / 2, h / 2])
-    # plt.axis('scaled')
-#     plt.xlabel('Dalgarnitude')
-#     plt.ylabel('Paulness')
-#     plt.title('Fourier Series Drawing of Dr. Paul Andrew Dalgarno')
 
-
-# ani = animation.FuncAnimation(
-#     fig, drawnext, init_func=init_func, interval=100 / 2.4,
-#     frames=tqdm(range(len(
-#         child.findall(".//{http://www.w3.org/2000/svg}path"))
-#         * (N))), repeat=False)
+# add extra frames at end of final drawing
+for k in range(0, int(N/4)):
+    frame_data.append(-1)
 
 ani = animation.FuncAnimation(
     fig, drawnext, init_func=init_func, interval=100 * (100/N) / 2.4,
@@ -336,4 +239,3 @@ ani = animation.FuncAnimation(
 
 
 ani.save(out)
-# plt.show()
