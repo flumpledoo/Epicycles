@@ -20,25 +20,25 @@ from matplotlib.patches import Circle
 import matplotlib.animation as animation
 from tqdm import tqdm
 
-# # get input file name
-# filename = sys.argv[1]
+# get input file name
+filename = sys.argv[1]
 
-# # get output file name
-# if len(sys.argv) > 3:
-#     out = sys.argv[3]
-# # if not provided, use input filename as base
-# else:
-#     out = '.'.join([filename[:-4], 'mp4'])
+# get output file name
+if len(sys.argv) > 3:
+    out = sys.argv[3]
+# if not provided, use input filename as base
+else:
+    out = '.'.join([filename[:-4], 'mp4'])
 
-filename = './drawing-1.svg'
-out = './test.mp4'
-N=50
+# filename = './drawing-1.svg'
+# out = './test.mp4'
+# N=100
 
-# # no. points to sample along longest bezier curve, shorter ones will be adjusted
-# if len(sys.argv) > 2:
-#     N = int(sys.argv[2])
-# else:
-#     N = 100
+# no. points to sample along longest bezier curve, shorter ones will be adjusted
+if len(sys.argv) > 2:
+    N = int(sys.argv[2])
+else:
+    N = 100
 
 
 # list of bezier curves
@@ -209,9 +209,11 @@ def draw_epi(k, A, time, phase, wavex, wavey, curve_index):
 
     return [wavex, wavey]
 
+prev_cur = 0
+
 def drawnext(i):
 
-    global wavex, wavey, comp, xp, yp, current_frame
+    global wavex, wavey, comp, xp, yp, current_frame, prev_cur
 
     # if i % N == 0:
     #     comp = compute_epi(cur[int(np.floor(i / (N)))], N)
@@ -221,11 +223,14 @@ def drawnext(i):
     #     wavex = list()
     #     wavey = list()
 
-    comp = cycle_data[i]  # get current curve's epicycle data
-    xp.append(wavex.copy())
-    yp.append(wavey.copy())
-    wavex = list()
-    wavey = list()
+    if prev_cur != i:
+        comp = cycle_data[i]  # get current curve's epicycle data
+        xp.append(wavex.copy())
+        yp.append(wavey.copy())
+        wavex = list()
+        wavey = list()
+        prev_cur = i
+        current_frame = 0
 
     # a = draw_epi(comp['frequency'], comp['radii'], current_frame * 2 *
                 #  np.pi / N, comp['phase'], wavex, wavey, i)
@@ -282,6 +287,8 @@ def drawnext(i):
 
         ax.plot(lines[j, 0:2], lines[j, 2:4], color='k')
 
+        ax.plot(wavex, wavey, '-b')
+
 
     # pointer
     # pntr,  = ax.plot(x, y, 'or')
@@ -324,7 +331,7 @@ def init_func():
 #         * (N))), repeat=False)
 
 ani = animation.FuncAnimation(
-    fig, drawnext, init_func=init_func, interval=100 / 2.4,
+    fig, drawnext, init_func=init_func, interval=100 * (100/N) / 2.4,
     frames=tqdm(frame_data), repeat=False, blit=False)
 
 
